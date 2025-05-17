@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
+
+<!--
+Hello Mr.Spy!
+As you can see this code is extremely long and messy, so if you can DONT TUCH ANYTHING!
+Moving or deleting anything could break the code.
+If you have a request or any question or problem please ask me on Discord.
+This is a discord server where I am active: https://discord.gg/pMTvXpXT3h
+Anyways, enjoy the code! Because you will take a long time to read it all, there actually around 1000 lines of code. 
+-->
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,12 +75,13 @@
             color: #cce0ff;
         }
         main {
-            max-width: 480px;
+            max-width: 85vw;
             margin: 40px auto 0 auto;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             padding: 32px 24px 24px 24px;
+            margin-bottom: 40px;
         }
         .button-row {
             margin: 32px 0 0 0;
@@ -122,6 +134,35 @@
             color: #fff;
             letter-spacing: 2px;
         }
+        .schedule-section {
+            margin-top: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            background: #f9fbfd;
+            font-size: 0.97em;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #cce0ff;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .schedule-table th {
+            background: #e6f0fa;
+            color: #003366;
+            font-weight: 600;
+        }
+        .schedule-table tr:nth-child(even) {
+            background: #f4f7fa;
+        }
+        .schedule-section h3 {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
         @media (max-width: 600px) {
             main {
                 margin: 16px;
@@ -141,6 +182,9 @@
             }
             .header-right {
                 align-items: flex-end;
+            }
+            .schedule-table {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -174,6 +218,156 @@
             <p>
                 <strong>Note:</strong> For best results, use a modern browser and allow audio playback.
             </p>
+        </div>
+        <div class="schedule-section">
+            <h3 style="color:#003366;margin-top:32px;margin-bottom:12px;">FUTS Schedule</h3>
+            <div style="overflow-x:auto;">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>Event</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>hh:mm:00</td>
+                        <td>Pre-tone</td>
+                        <td>1000 Hz (min 0–4, 10–14, ...), 1500 Hz (min 5–9, 15–19, ...), 1200 Hz (min 50–59), 1s</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:00–59</td>
+                        <td>100 Hz Tick</td>
+                        <td>Every second, 0.5s (BCD encoded)</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:00–59</td>
+                        <td>1000 Hz Tick</td>
+                        <td>Every second, 20ms</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:10</td>
+                        <td>Continuous Tone</td>
+                        <td>WWV/WWVH, up to ~40s (stops at :43)</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:43</td>
+                        <td>Stop Continuous Tone</td>
+                        <td>Ends WWV/WWVH tone</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:51</td>
+                        <td>French Voice Time</td>
+                        <td>Announces next minute in French</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:02</td>
+                        <td>English Voice Time</td>
+                        <td>Announces current minute in English</td>
+                    </tr>
+                    <tr>
+                        <td>hh:mm:15 (every 10 min)</td>
+                        <td>Special Message</td>
+                        <td>French & English announcement</td>
+                    </tr>
+                    <tr>
+                        <td>hh:00:00</td>
+                        <td>La Marseillaise</td>
+                        <td>French national anthem</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+        <div class="schedule-section">
+            <h3 style="color:#003366;margin-top:32px;margin-bottom:12px;">WWV / WWVH Minute Tone Schedule</h3>
+            <div style="overflow-x:auto;">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Minute</th>
+                        <th>WWV Tone (Hz)</th>
+                        <th>WWVH Tone (Hz)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>00</td><td>-</td><td>-</td></tr>
+                    <tr><td>01</td><td>-</td><td>440</td></tr>
+                    <tr><td>02</td><td>440</td><td>-</td></tr>
+                    <tr><td>03</td><td>-</td><td>500</td></tr>
+                    <tr><td>04</td><td>500</td><td>-</td></tr>
+                    <tr><td>05</td><td>600</td><td>500</td></tr>
+                    <tr><td>06</td><td>500</td><td>600</td></tr>
+                    <tr><td>07</td><td>600</td><td>500</td></tr>
+                    <tr><td>08</td><td>-</td><td>-</td></tr>
+                    <tr><td>09</td><td>-</td><td>-</td></tr>
+                    <tr><td>10</td><td>-</td><td>-</td></tr>
+                    <tr><td>11</td><td>600</td><td>500</td></tr>
+                    <tr><td>12</td><td>500</td><td>600</td></tr>
+                    <tr><td>13</td><td>600</td><td>500</td></tr>
+                    <tr><td>14</td><td>500</td><td>-</td></tr>
+                    <tr><td>15</td><td>600</td><td>-</td></tr>
+                    <tr><td>16</td><td>500</td><td>-</td></tr>
+                    <tr><td>17</td><td>600</td><td>-</td></tr>
+                    <tr><td>18</td><td>-</td><td>-</td></tr>
+                    <tr><td>19</td><td>-</td><td>-</td></tr>
+                    <tr><td>20</td><td>500</td><td>600</td></tr>
+                    <tr><td>21</td><td>600</td><td>500</td></tr>
+                    <tr><td>22</td><td>500</td><td>600</td></tr>
+                    <tr><td>23</td><td>600</td><td>500</td></tr>
+                    <tr><td>24</td><td>500</td><td>600</td></tr>
+                    <tr><td>25</td><td>600</td><td>500</td></tr>
+                    <tr><td>26</td><td>500</td><td>600</td></tr>
+                    <tr><td>27</td><td>600</td><td>500</td></tr>
+                    <tr><td>28</td><td>500</td><td>600</td></tr>
+                    <tr><td>29</td><td>-</td><td>-</td></tr>
+                    <tr><td>30</td><td>-</td><td>-</td></tr>
+                    <tr><td>31</td><td>600</td><td>500</td></tr>
+                    <tr><td>32</td><td>500</td><td>600</td></tr>
+                    <tr><td>33</td><td>600</td><td>500</td></tr>
+                    <tr><td>34</td><td>500</td><td>600</td></tr>
+                    <tr><td>35</td><td>600</td><td>500</td></tr>
+                    <tr><td>36</td><td>500</td><td>600</td></tr>
+                    <tr><td>37</td><td>600</td><td>500</td></tr>
+                    <tr><td>38</td><td>500</td><td>600</td></tr>
+                    <tr><td>39</td><td>600</td><td>500</td></tr>
+                    <tr><td>40</td><td>500</td><td>600</td></tr>
+                    <tr><td>41</td><td>600</td><td>500</td></tr>
+                    <tr><td>42</td><td>500</td><td>600</td></tr>
+                    <tr><td>43</td><td>-</td><td>500</td></tr>
+                    <tr><td>44</td><td>-</td><td>500</td></tr>
+                    <tr><td>45</td><td>-</td><td>500</td></tr>
+                    <tr><td>46</td><td>-</td><td>600</td></tr>
+                    <tr><td>47</td><td>-</td><td>500</td></tr>
+                    <tr><td>48</td><td>-</td><td>500</td></tr>
+                    <tr><td>49</td><td>-</td><td>500</td></tr>
+                    <tr><td>50</td><td>-</td><td>600</td></tr>
+                    <tr><td>51</td><td>-</td><td>500</td></tr>
+                    <tr><td>52</td><td>500</td><td>600</td></tr>
+                    <tr><td>53</td><td>600</td><td>500</td></tr>
+                    <tr><td>54</td><td>500</td><td>600</td></tr>
+                    <tr><td>55</td><td>600</td><td>500</td></tr>
+                    <tr><td>56</td><td>500</td><td>600</td></tr>
+                    <tr><td>57</td><td>600</td><td>500</td></tr>
+                    <tr><td>58</td><td>500</td><td>600</td></tr>
+                    <tr><td>59</td><td>-</td><td>-</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <br>
+            <div style="font-size:0.95em;color:#555;margin-top:8px;overflow-x:auto;">
+                <strong>Note:</strong> "-" means no tone for that minute.<br>
+                <strong>Note:</strong> 440, 500 and 600 is the Hz frequency of the tone.<br>
+                <strong>Note:</strong> The tones switch between WWV and WWVH each hour, e.g. 12:00 = WWV, 17:00 = WWVH.<br><br>
+                <b><pre style="white-space:pre-wrap;margin:0;">
+WWV Schedule:
+00:00, 02:00, 04:00, 06:00, 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00, 22:00
+
+WWVH Schedule:
+01:00, 03:00, 05:00, 07:00, 09:00, 11:00, 13:00, 15:00, 17:00, 19:00, 21:00, 23:00
+                </pre></b>
+            </div>
         </div>
     </main>
     <script>
@@ -227,7 +421,7 @@
         let tickingOscillator = null;
         let continuousOscillators = [];
         let continuousGainNodes = [];
-        let marseillaiseAudio = new Audio("./LA.MARSEILLAISE.wav");
+        let marseillaiseAudio = new Audio("./LA.MARSEILLAISE.mp3");
         let isTestMode = false; // Flag to indicate if the test mode is active
         let testEndTime = null; // Time when the test mode should end
         let preToneOscillator = null;
