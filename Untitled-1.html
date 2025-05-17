@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>France Universal Time Signal</title>
+    <meta name="description" content="France Universal Time Signal (FUTS) - A radio fan creation inspired by NIST WWV.">
+    <meta name="author" content="Signabroam">
+    <meta name="keywords" content="France, Universal Time Signal, FUTS, NIST WWV, radio, time signal">
+    <meta name="theme-color" content="#003366">
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f7fa;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #222;
+        }
+        header {
+            background: #003366;
+            color: #fff;
+            padding: 32px 0 24px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .header-left, .header-right {
+            position: absolute;
+            top: 18px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .header-left {
+            left: 24px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+        .header-right {
+            right: 24px;
+            gap: 8px;
+        }
+        .volume-label {
+            font-size: 1rem;
+            color: #cce0ff;
+            margin-right: 8px;
+        }
+        .volume-slider {
+            width: 100px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+        }
+        header h2 {
+            margin: 8px 0 0 0;
+            font-weight: 400;
+            font-size: 1.2rem;
+            color: #cce0ff;
+        }
+        main {
+            max-width: 480px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 24px 24px 24px;
+        }
+        .button-row {
+            margin: 32px 0 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        button {
+            background: #0057b8;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            padding: 12px 32px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        button:hover, button:focus {
+            background: #003366;
+            outline: none;
+        }
+        .info {
+            margin-top: 24px;
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.6;
+        }
+        @media (max-width: 600px) {
+            main {
+                margin: 16px;
+                padding: 18px 8px;
+            }
+            header {
+                padding: 18px 0 12px 0;
+            }
+            header h1 {
+                font-size: 1.5rem;
+            }
+            .header-left, .header-right {
+                position: static;
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }
+            .header-right {
+                align-items: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <span id="utc0">UTC 0: 00:00:00</span>
+            <span id="client-utc">Client Time UTC: 00:00:00</span>
+            <span style="font-size:0.8em;color:#8bb;">Your time</span>
+            <span id="client-date">Date: 1970-01-01</span>
+        </div>
+        <h1>France Universal Time Signal ( FUTS )</h1>
+        <h2>A radio fan creation inspired by NIST WWV</h2>
+    </header>
+    <main>
+        <div class="button-row">
+            <button id="signalBtn" onclick="toggleTimeSignal()">Start the Time Signal</button>
+        </div>
+        <div class="info">
+            <p>
+                This project simulates a time signal station, similar to <a href="https://www.nist.gov/pml/time-and-frequency-division/time-distribution/radio-station-wwv" target="_blank" rel="noopener" style="color:#0057b8;text-decoration:underline;">NIST WWV</a>.<br>
+                It features pre-tones, continuous tones, ticks, and voice announcements, all synchronized to your device's clock.
+            </p>
+            <p>
+                <strong>Note:</strong> For best results, use a modern browser and allow audio playback.
+            </p>
+        </div>
+    </main>
+    <script>
+        // --- Time display logic ---
+        function pad(n) { return n < 10 ? '0' + n : n; }
+        function updateClocks() {
+            const now = new Date();
+            // Show real UTC time
+            document.getElementById('utc0').textContent =
+                'UTC 0: ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds());
+            // Show local time (your device time)
+            document.getElementById('client-utc').textContent =
+                'Client Time UTC: ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+            // Client Date (local date)
+            document.getElementById('client-date').textContent =
+                'Date: ' + now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+        }
+        setInterval(updateClocks, 500);
+        updateClocks();
+
+        // --- Start/Stop button logic ---
+        let signalRunning = false;
+        function toggleTimeSignal() {
+            if (!signalRunning) {
+                startTimeSignal();
+                signalRunning = true;
+                document.getElementById('signalBtn').textContent = "Stop the Time Signal";
+            } else {
+                stopTimeSignal();
+                signalRunning = false;
+                document.getElementById('signalBtn').textContent = "Start the Time Signal";
+            }
+        }
+        function stopTimeSignal() {
+            if (interval) clearInterval(interval);
+            interval = null;
+            stopTickingClock();
+            stop1000HzTick();
+            stopAllSounds();
+        }
+    </script>
+    <script>
+        let interval;
+        let isBeeping = false;
+        let isLongBeepPlaying = false;
+        let isSpeaking = false;
+        let specialMessagePlaying = false;
+        let isPlayingMarseillaise = false;
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let tickingInterval; // Interval for the 100Hz ticking sound
+        let tickingOscillator = null;
+        let continuousOscillators = [];
+        let continuousGainNodes = [];
+        let marseillaiseAudio = new Audio("https://github.com/Signabroam/radio.alien/raw/refs/heads/main/La%20Marseillaise.mp3");
+        let isTestMode = false; // Flag to indicate if the test mode is active
+        let testEndTime = null; // Time when the test mode should end
+        let preToneOscillator = null;
+        let preToneGain = null;
+        let tick1000Oscillator = null; // Oscillator for the 1000Hz tick
+        let tick1000Interval = null; // Interval ID for the 1000Hz tick
+
+        function startTimeSignal() {
+            if (interval) clearInterval(interval);
+            interval = setInterval(checkTime, 1000);
+            startTickingClock(); // Start the 100Hz ticking clock
+            start1000HzTick();   // Start the 1000Hz tick
+        }
+
+        function startTickingClock() {
+            if (tickingInterval) return; // Prevent multiple ticking intervals
+
+            // Align the ticking with the current second
+            const now = new Date();
+            const millisecondsUntilNextSecond = 1000 - now.getMilliseconds();
+
+            setTimeout(() => {
+                tickingInterval = setInterval(() => {
+                    const currentSecond = new Date().getSeconds();
+
+                    if (tickingOscillator) {
+                        // Stop the current tick
+                        tickingOscillator.stop();
+                        tickingOscillator.disconnect();
+                        tickingOscillator = null;
+                    }
+
+                    // Check if it's time for a double tick (every 10 seconds)
+                    if (currentSecond % 10 === 0) {
+                        playTick(700); // Double tick: 0.7s long
+                    } 
+                    // Check if it's time for a second 0.7s tick (e.g., hh:mm:10, hh:mm:11, etc.)
+                    else if (currentSecond === 10 || currentSecond === 11 || currentSecond === 20 || currentSecond === 21 || currentSecond === 30 || currentSecond === 31 || currentSecond === 40 || currentSecond === 41 || currentSecond === 50 || currentSecond === 51) {
+                        playTick(700); // Second 0.7s tick
+                    } else {
+                        // Regular tick: 0.1s long
+                        playTick(100);
+                    }
+                }, 1000); // 1-second interval
+            }, millisecondsUntilNextSecond); // Start ticking at the next second
+        }
+
+        function playTick(duration = 500) {
+            tickingOscillator = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+
+            tickingOscillator.type = "sine";
+            tickingOscillator.frequency.setValueAtTime(100, audioCtx.currentTime); // 100Hz frequency
+            gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime); // 80% volume
+
+            tickingOscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            tickingOscillator.start();
+            setTimeout(() => {
+                if (tickingOscillator) {
+                    tickingOscillator.stop();
+                    tickingOscillator.disconnect();
+                    tickingOscillator = null;
+                }
+            }, duration); // Tick duration (now 0.5s)
+        }
+
+        function stopTickingClock() {
+            if (tickingInterval) {
+                clearInterval(tickingInterval);
+                tickingInterval = null;
+            }
+            if (tickingOscillator) {
+                tickingOscillator.stop();
+                tickingOscillator.disconnect();
+                tickingOscillator = null;
+            }
+        }
+
+        function checkTime() {
+            let now = new Date();
+            let utcHours = now.getUTCHours();
+            let utcMinutes = now.getUTCMinutes();
+            let utcSeconds = now.getUTCSeconds();
+
+            // If test mode is active, skip the default behavior
+            if (isTestMode) {
+                if (now >= testEndTime) {
+                    isTestMode = false; // Disable test mode after the test sequence ends
+                }
+                return;
+            }
+
+            if (utcMinutes === 0 && utcSeconds === 0 && !isPlayingMarseillaise) {
+                playMarseillaise(); // Play "La Marseillaise" at hh:00
+            } else if (utcSeconds === 15 && utcMinutes % 10 === 0) {
+                stopContinuousTone(); // Stop tone during special message
+                playSpecialMessage();
+            } else if (utcSeconds === 51) {
+                stopContinuousTone(); // Stop tone during time announcement
+                speakTime(utcHours, (utcMinutes + 1) % 60, "fr");
+            } else if (utcSeconds === 59 && !isLongBeepPlaying) {
+                stopContinuousTone(); // Stop tone during long beep
+                playLongBeep();
+            } else if (utcSeconds === 2) {
+                stopContinuousTone(); // Stop tone during time announcement
+                speakTime(utcHours, utcMinutes, "en", true);
+            } else if (utcSeconds === 30 || utcSeconds === 31) {
+                playDoubleBeep();
+            } else if (utcSeconds === 10 && !isSpeaking && !specialMessagePlaying) {
+                startContinuousToneWWV(utcMinutes, utcHours);
+            } else if (utcSeconds === 43) {
+                stopContinuousTone(); // Stop tone at hh:mm:43
+            } else if (utcSeconds === 0) {
+                stopTickingClock(); // Stop ticking so pre-tone is clear
+                let preToneFreq = null;
+                if (
+                    (utcMinutes >= 0 && utcMinutes <= 4) ||
+                    (utcMinutes >= 10 && utcMinutes <= 14) ||
+                    (utcMinutes >= 20 && utcMinutes <= 24) ||
+                    (utcMinutes >= 30 && utcMinutes <= 34) ||
+                    (utcMinutes >= 40 && utcMinutes <= 44)
+                ) {
+                    preToneFreq = 1000;
+                } else if (
+                    (utcMinutes >= 5 && utcMinutes <= 9) ||
+                    (utcMinutes >= 15 && utcMinutes <= 19) ||
+                    (utcMinutes >= 25 && utcMinutes <= 29) ||
+                    (utcMinutes >= 35 && utcMinutes <= 39) ||
+                    (utcMinutes >= 45 && utcMinutes <= 49)
+                ) {
+                    preToneFreq = 1500;
+                } else if (utcMinutes >= 50 && utcMinutes <= 59) {
+                    preToneFreq = 1200;
+                }
+                if (preToneFreq) {
+                    playPreTone(preToneFreq, 1000, () => {
+                        setTimeout(startTickingClock, 100); // Restart ticking after pre-tone
+                    });
+                } else {
+                    setTimeout(startTickingClock, 100);
+                }
+            }
+        }
+
+        function playMarseillaise() {
+            stopAllSounds(); // Stop all tones
+            isPlayingMarseillaise = true;
+            marseillaiseAudio.play();
+            marseillaiseAudio.onended = () => {
+                isPlayingMarseillaise = false;
+            };
+        }
+
+        function scheduleTest() {
+            let now = new Date();
+            let currentSeconds = now.getSeconds();
+            let nextMinute = (now.getMinutes() + 1) % 60; // Schedule for the next minute
+            let nextHour = now.getMinutes() === 59 ? (now.getHours() + 1) % 24 : now.getHours();
+
+            // Enable test mode
+            isTestMode = true;
+            testEndTime = new Date(now.getTime() + 2 * 60 * 1000); // Test mode lasts for 2 minutes
+
+            // Schedule the test announcement at mm:20
+            setTimeout(() => {
+                stopAllSounds(); // Stop all tones except the 100Hz ticking clock
+                speakTime(nextHour, nextMinute, "fr"); // Announce the test
+            }, (60 - currentSeconds) * 1000); // Wait until the next minute
+
+            // Schedule "La Marseillaise" at mm:21
+            setTimeout(() => {
+                stopAllSounds(); // Stop all tones except the 100Hz ticking clock
+                playMarseillaise(); // Play "La Marseillaise"
+            }, (120 - currentSeconds) * 1000); // Wait until the minute after the announcement
+
+            // Disable test mode after 2 minutes
+            setTimeout(() => {
+                isTestMode = false;
+            }, (120 - currentSeconds) * 1000 + marseillaiseAudio.duration * 1000);
+        }
+
+        function stopAllSounds() {
+            stopContinuousTone(); // Stop continuous tones
+            isSpeaking = false;
+            specialMessagePlaying = false;
+            isBeeping = false;
+            isLongBeepPlaying = false;
+        }
+
+        function playBeep(frequency = 1000, volume = 1, duration = 100) {
+            if (isBeeping || oscillator || isSpeaking || specialMessagePlaying) return;
+
+            isBeeping = true;
+            oscillator = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+                isBeeping = false;
+                oscillator = null;
+            }, duration);
+        }
+
+        function playLongBeep() {
+            if (isLongBeepPlaying || oscillator) return;
+
+            isLongBeepPlaying = true;
+            let oscillator = audioCtx.createOscillator(); // <-- add let
+            let gainNode = audioCtx.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+                isLongBeepPlaying = false;
+                oscillator = null;
+            }, 2000);
+        }
+
+        function playDoubleBeep() {
+            if (isBeeping || oscillator || isSpeaking || specialMessagePlaying) return;
+
+            isBeeping = true;
+            let firstBeep = audioCtx.createOscillator();
+            let gainNode1 = audioCtx.createGain();
+
+            firstBeep.type = "sine";
+            firstBeep.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gainNode1.gain.setValueAtTime(1, audioCtx.currentTime);
+
+            firstBeep.connect(gainNode1);
+            gainNode1.connect(audioCtx.destination);
+
+            firstBeep.start();
+            setTimeout(() => {
+                firstBeep.stop();
+
+                let secondBeep = audioCtx.createOscillator();
+                let gainNode2 = audioCtx.createGain();
+
+                secondBeep.type = "sine";
+                secondBeep.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                gainNode2.gain.setValueAtTime(1, audioCtx.currentTime);
+
+                secondBeep.connect(gainNode2);
+                gainNode2.connect(audioCtx.destination);
+
+                secondBeep.start();
+                setTimeout(() => {
+                    secondBeep.stop();
+                    isBeeping = false;
+                }, 100);
+            }, 100);
+        }
+
+        function speakTime(hours, minutes, lang, restartBeep = false) {
+            let msg;
+            if (lang === "fr") {
+                msg = new SpeechSynthesisUtterance(`Signal du temps universel français, ${hours} heures, ${minutes} minutes, coordonnée au temps universel.`);
+                msg.lang = "fr-FR";
+            } else {
+                msg = new SpeechSynthesisUtterance(`France Universal Time Signal, ${hours} hours, ${minutes} minutes, Coordinated Universal Time.`);
+                msg.lang = "en-US";
+            }
+
+            msg.rate = 1;
+            msg.pitch = 1;
+            msg.volume = 1.0; // Maximum volume
+
+            msg.onend = () => {
+                isSpeaking = false;
+                if (restartBeep) {
+                    startTimeSignal(); // Redémarrer immédiatement la séquence des bips
+                }
+            };
+
+            isSpeaking = true;
+            speechSynthesis.speak(msg);
+        }
+
+        function playSpecialMessage() {
+            specialMessagePlaying = true;
+            let msgFr = new SpeechSynthesisUtterance(`Retouver le projet France Time Signal sur GitHub ainsi que sur notre site web, notre service de temp et disponible temporairement due a une non autorisation de transmission.`);
+            msgFr.lang = "fr-FR";
+            msgFr.volume = 1.0; // Maximum volume
+
+            let msgEn = new SpeechSynthesisUtterance(`Find the France Time Signal project on GitHub and on our website, our time service is temporarily unavailable due to a transmission authorization issue.`);
+            msgEn.lang = "en-US";
+            msgEn.volume = 1.0; // Maximum volume
+
+            msgFr.onend = () => {
+                speechSynthesis.speak(msgEn);
+            };
+
+            msgEn.onend = () => {
+                specialMessagePlaying = false;
+                startTimeSignal();
+            };
+
+            speechSynthesis.speak(msgFr);
+        }
+
+        function startContinuousTone(baseFrequency) {
+            if (continuousOscillators.length > 0) return; // Prevent multiple sets of oscillators
+
+            const frequencies = [baseFrequency, baseFrequency + 700, baseFrequency + 1400, baseFrequency + 2100]; // 1000Hz, 1700Hz, 2400Hz, 3100Hz
+
+            frequencies.forEach((frequency) => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = "sine";
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); // Set frequency
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); // Set volume to 30%
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+
+                continuousOscillators.push(oscillator);
+                continuousGainNodes.push(gainNode);
+            });
+        }
+
+        function playContinuousTones(frequencies, duration = 1000) {
+            stopContinuousTone();
+            frequencies.forEach(frequency => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = "sine";
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                continuousOscillators.push(oscillator);
+                continuousGainNodes.push(gainNode);
+
+                setTimeout(() => {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                    gainNode.disconnect();
+                }, duration);
+            });
+
+            setTimeout(() => {
+                continuousOscillators = [];
+                continuousGainNodes = [];
+            }, duration);
+        }
+
+        function stopContinuousTone() {
+            continuousOscillators.forEach((oscillator) => {
+                oscillator.stop();
+                oscillator.disconnect();
+            });
+            continuousGainNodes.forEach((gainNode) => {
+                gainNode.disconnect();
+            });
+            continuousOscillators = [];
+            continuousGainNodes = [];
+        }
+
+        function getWWVTone(minute) {
+            // Returns frequency in Hz or null for silence
+            // WWV
+            if ([4, 6, 12, 14, 16, 20, 22, 24, 26, 28, 32, 34, 36, 38, 40, 42, 52, 54, 56, 58].includes(minute)) return 500;
+            if ([1, 3, 5, 7, 11, 13, 15, 17, 19, 21, 23, 25, 27, 31, 33, 35, 37, 39, 41, 53, 55, 57].includes(minute)) return 600;
+            if (minute === 2) return 440;
+            if ([0, 8, 9, 10, 18, 29, 30, 43, 44, 45, 46, 47, 48, 49, 50, 51, 59].includes(minute)) return null;
+            return null;
+        }
+
+        function getWWVHTone(minute) {
+            // Returns frequency in Hz or null for silence
+            // WWVH
+            if ([3, 5, 7, 11, 13, 21, 23, 25, 27, 31, 33, 35, 37, 39, 41, 43, 44, 45, 47, 48, 49, 50, 51, 53, 55, 57].includes(minute)) return 500;
+            if ([2, 4, 6, 12, 20, 22, 24, 26, 28, 32, 34, 36, 38, 40, 42, 46, 52, 54, 56, 58].includes(minute)) return 600;
+            if (minute === 1) return 440;
+            if ([0, 8, 9, 10, 14, 15, 16, 17, 18, 19, 29, 30].includes(minute)) return null;
+            return null;
+        }
+
+        function startContinuousToneWWV(minute, hour) {
+            // Determine which tones to play (WWV or WWVH)
+            const wwvHours = [0,2,4,6,8,10,12,14,16,18,20,22];
+            const wwvhHours = [1,3,5,7,9,11,13,15,17,19,21,23];
+            let frequencies = [];
+            if (wwvHours.includes(hour)) {
+                const wwvFreq = getWWVTone(minute);
+                if (wwvFreq) frequencies.push(wwvFreq);
+            }
+            if (wwvhHours.includes(hour)) {
+                const wwvhFreq = getWWVHTone(minute);
+                if (wwvhFreq) frequencies.push(wwvhFreq);
+            }
+
+            playContinuousTones(frequencies, 40000); // Play for up to 40 seconds, will be stopped at :43
+        }
+
+        function playWWVTones(minute, hour, duration = 1000) {
+            stopContinuousTone();
+
+            // Define WWV and WWVH hours
+            const wwvHours = [0,2,4,6,8,10,12,14,16,18,20,22];
+            const wwvhHours = [1,3,5,7,9,11,13,15,17,19,21,23];
+
+            let frequencies = [];
+            if (wwvHours.includes(hour)) {
+                const wwvFreq = getWWVTone(minute);
+                if (wwvFreq) frequencies.push(wwvFreq);
+            }
+            if (wwvhHours.includes(hour)) {
+                const wwvhFreq = getWWVHTone(minute);
+                if (wwvhFreq) frequencies.push(wwvhFreq);
+            }
+
+            frequencies.forEach(frequency => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = "sine";
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                continuousOscillators.push(oscillator);
+                continuousGainNodes.push(gainNode);
+
+                setTimeout(() => {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                    gainNode.disconnect();
+                }, duration);
+            });
+
+            setTimeout(() => {
+                continuousOscillators = [];
+                continuousGainNodes = [];
+            }, duration);
+        }
+
+        function playPreTone(frequency, duration = 1000, callback = null) {
+            console.log("Playing pre-tone:", frequency, "Hz for", duration, "ms");
+            stopPreTone();
+            preToneOscillator = audioCtx.createOscillator();
+            preToneGain = audioCtx.createGain();
+            preToneOscillator.type = "sine";
+            preToneOscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            preToneGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+            preToneOscillator.connect(preToneGain);
+            preToneGain.connect(audioCtx.destination);
+            preToneOscillator.start();
+
+            setTimeout(() => {
+                stopPreTone();
+                if (typeof callback === "function") callback();
+            }, duration);
+        }
+
+        function stopPreTone() {
+            if (preToneOscillator) {
+                preToneOscillator.stop();
+                preToneOscillator.disconnect();
+                preToneOscillator = null;
+            }
+            if (preToneGain) {
+                preToneGain.disconnect();
+                preToneGain = null;
+            }
+        }
+
+        function play1000HzTick() {
+            if (tick1000Oscillator) {
+                tick1000Oscillator.stop();
+                tick1000Oscillator.disconnect();
+                tick1000Oscillator = null;
+            }
+            tick1000Oscillator = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            tick1000Oscillator.type = "sine";
+            tick1000Oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+
+            tick1000Oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            tick1000Oscillator.start();
+            setTimeout(() => {
+                if (tick1000Oscillator) {
+                    tick1000Oscillator.stop();
+                    tick1000Oscillator.disconnect();
+                    tick1000Oscillator = null;
+                }
+                gainNode.disconnect();
+            }, 20); // 20 ms
+        }
+
+        function start1000HzTick() {
+            if (tick1000Interval) return; // Prevent multiple intervals
+
+            // Align with the next second
+            const now = new Date();
+            const msToNextSecond = 1000 - now.getMilliseconds();
+
+            setTimeout(() => {
+                play1000HzTick(); // Play immediately at the next second
+                tick1000Interval = setInterval(play1000HzTick, 1000);
+            }, msToNextSecond);
+        }
+
+        function stop1000HzTick() {
+            if (tick1000Interval) {
+                clearInterval(tick1000Interval);
+                tick1000Interval = null;
+            }
+            if (tick1000Oscillator) {
+                tick1000Oscillator.stop();
+                tick1000Oscillator.disconnect();
+                tick1000Oscillator = null;
+            }
+        }
+    </script>
+</body>
+</html>
