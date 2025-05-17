@@ -98,6 +98,30 @@
             color: #444;
             line-height: 1.6;
         }
+        #futs-overlay {
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 51, 102, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s;
+        }
+        .futs-overlay-content {
+            background: rgba(0,0,0,0.7);
+            padding: 48px 32px;
+            border-radius: 18px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        }
+        #futs-overlay h1 {
+            font-size: 2.2em;
+            margin-bottom: 12px;
+            color: #fff;
+            letter-spacing: 2px;
+        }
         @media (max-width: 600px) {
             main {
                 margin: 16px;
@@ -122,6 +146,12 @@
     </style>
 </head>
 <body>
+    <div id="futs-overlay">
+        <div class="futs-overlay-content">
+            <h1>Click to start FUTS</h1>
+            <p style="font-size:1.1em;color:#cce0ff;">This site requires a click to enable audio.<br>Click anywhere to begin.</p>
+        </div>
+    </div>
     <header>
         <div class="header-left">
             <span id="utc0">UTC 0: 00:00:00</span>
@@ -737,6 +767,21 @@
                 tick1000Oscillator = null;
             }
         }
+
+        // Overlay click-to-start logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('futs-overlay');
+            overlay.addEventListener('click', function() {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 300);
+                // Resume or create AudioContext if needed
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            });
+        });
     </script>
 </body>
 </html>
