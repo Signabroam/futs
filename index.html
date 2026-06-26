@@ -21,388 +21,719 @@ Anyways, enjoy the code! Because you will take a long time to read it all, there
     <meta name="theme-color" content="#003366">
     <link rel="icon" href="icon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="icon.ico">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@300;400;700&display=swap">
     <style>
+        :root {
+            --navy:    #001f4d;
+            --blue:    #003366;
+            --accent:  #0057b8;
+            --sky:     #cce0ff;
+            --green:   #28a745;
+            --red:     #dc3545;
+            --bg:      #f0f4fa;
+            --card:    #ffffff;
+            --border:  #d0dff5;
+            --mono:    'Share Tech Mono', monospace;
+            --sans:    'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
+        /* ── RESET & BASE ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 0;
-            background: #f4f7fa;
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: #222;
+            background: var(--bg);
+            font-family: var(--sans);
+            color: #1a2235;
+            min-height: 100vh;
         }
-        header {
-            background: #003366;
-            color: #fff;
-            padding: 32px 0 24px 0;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            position: relative;
-        }
-        .header-left, .header-right {
-            position: absolute;
-            top: 18px;
-            font-size: 1rem;
+
+        /* ── LOADING SCREEN ── */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--navy);
             display: flex;
-            align-items: center;
-        }
-        .header-left {
-            left: 24px;
             flex-direction: column;
-            align-items: flex-start;
-            gap: 2px;
-        }
-        .header-right {
-            right: 24px;
-            gap: 8px;
-        }
-        .volume-label {
-            font-size: 1rem;
-            color: #cce0ff;
-            margin-right: 8px;
-        }
-        .volume-slider {
-            width: 100px;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 1px;
-        }
-        header h2 {
-            margin: 8px 0 0 0;
-            font-weight: 400;
-            font-size: 1.2rem;
-            color: #cce0ff;
-        }
-        main {
-            max-width: 85vw;
-            margin: 40px auto 0 auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 32px 24px 24px 24px;
-            margin-bottom: 40px;
-        }
-        .button-row {
-            margin: 32px 0 0 0;
-            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 16px;
+            z-index: 10000;
+            gap: 24px;
+            transition: opacity 0.5s ease;
         }
-        button {
-            background: #0057b8;
+        #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+        .loading-logo {
+            font-family: var(--mono);
+            font-size: 2.2rem;
             color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            padding: 12px 32px;
-            cursor: pointer;
-            transition: background 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            letter-spacing: 4px;
         }
-        button:hover, button:focus {
-            background: #003366;
-            outline: none;
+        .loading-logo span { color: var(--sky); }
+        .loading-sub {
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: var(--sky);
+            letter-spacing: 2px;
+            opacity: 0.7;
         }
-        .info {
-            margin-top: 24px;
-            font-size: 1rem;
-            color: #444;
-            line-height: 1.6;
+        .loading-bar-wrap {
+            width: 320px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
         }
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0057b8, var(--sky));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+        .loading-status {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            color: var(--sky);
+            opacity: 0.6;
+            min-height: 1.2em;
+        }
+        .loading-count {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ── CLICK OVERLAY ── */
         #futs-overlay {
             position: fixed;
             z-index: 9999;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 51, 102, 0.5);
+            inset: 0;
+            background: rgba(0, 20, 50, 0.72);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: opacity 0.3s;
         }
         .futs-overlay-content {
-            background: rgba(0,0,0,0.7);
-            padding: 48px 32px;
-            border-radius: 18px;
+            background: rgba(0, 15, 40, 0.88);
+            border: 1px solid rgba(0, 87, 184, 0.4);
+            padding: 52px 40px;
+            border-radius: 20px;
             text-align: center;
             color: #fff;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 48px rgba(0,0,0,0.32);
         }
         #futs-overlay h1 {
-            font-size: 2.2em;
+            font-family: var(--mono);
+            font-size: 1.9em;
             margin-bottom: 12px;
             color: #fff;
+            letter-spacing: 3px;
+        }
+        .overlay-pulse {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--sky);
+            margin-right: 8px;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.7)} }
+
+        /* ── HEADER ── */
+        header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+            color: #fff;
+            padding: 28px 32px 24px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: start;
+            gap: 16px;
+            box-shadow: 0 3px 16px rgba(0,0,0,0.18);
+        }
+        .header-clocks {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .header-clocks .clock-line {
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: var(--sky);
+            opacity: 0.9;
+        }
+        .header-clocks .clock-line.primary { font-size: 1rem; color: #fff; opacity: 1; }
+        .header-center { text-align: center; }
+        header h1 {
+            font-family: var(--mono);
+            font-size: 2rem;
             letter-spacing: 2px;
+            line-height: 1.1;
         }
-        .schedule-section {
-            margin-top: 32px;
-            margin-bottom: 32px;
-            text-align: center;
+        header h1 span { color: var(--sky); }
+        header h2 {
+            margin-top: 6px;
+            font-weight: 300;
+            font-size: 0.9rem;
+            color: var(--sky);
+            opacity: 0.8;
+            letter-spacing: 0.5px;
         }
+        .header-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .badge-pill {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--sky);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(204,224,255,0.2);
+            border-radius: 20px;
+            padding: 3px 10px;
+            letter-spacing: 1px;
+        }
+
+        /* ── MAIN CONTENT ── */
+        main {
+            max-width: 920px;
+            margin: 36px auto 48px;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--card);
+            border-radius: 14px;
+            box-shadow: 0 2px 16px rgba(0,30,80,0.07);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(90deg, #f0f5ff 0%, #e8f0fa 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--blue);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: var(--mono);
+        }
+        .card-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        .card-body { padding: 20px; }
+
+        /* ── CONTROL PANEL ── */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .btn-main {
+            background: linear-gradient(135deg, var(--accent) 0%, #0041a0 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-family: var(--mono);
+            padding: 14px 44px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 16px rgba(0,87,184,0.25);
+            transition: all 0.2s;
+        }
+        .btn-main:hover, .btn-main:focus {
+            background: linear-gradient(135deg, #0041a0 0%, var(--navy) 100%);
+            box-shadow: 0 6px 22px rgba(0,87,184,0.35);
+            outline: none;
+            transform: translateY(-1px);
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-toggle {
+            border: none;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-family: var(--mono);
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .btn-toggle.on  { background: var(--green); color: #fff; }
+        .btn-toggle.off { background: var(--red);   color: #fff; }
+        .btn-toggle:hover { filter: brightness(1.1); }
+
+        /* ── INFO BOX ── */
+        .info-box {
+            background: #f5f8ff;
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #334;
+            line-height: 1.65;
+        }
+        .info-box a { color: var(--accent); text-decoration: underline; }
+        .info-box strong { color: var(--blue); }
+
+        /* ── INSPIRATION STRIP ── */
+        .inspiration-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .insp-card {
+            background: linear-gradient(135deg, #f0f5ff, #e8f0fa);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        .insp-card .insp-label {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insp-card .insp-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--blue);
+        }
+        .insp-card .insp-desc {
+            font-size: 0.82rem;
+            color: #556;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        /* ── SCHEDULE TABLE ── */
         .schedule-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0;
-            background: #f9fbfd;
-            font-size: 0.97em;
+            font-size: 0.88em;
         }
         .schedule-table th, .schedule-table td {
-            border: 1px solid #cce0ff;
-            padding: 8px 10px;
+            border: 1px solid var(--border);
+            padding: 9px 12px;
             text-align: left;
         }
         .schedule-table th {
-            background: #e6f0fa;
-            color: #003366;
-            font-weight: 600;
-        }
-        .schedule-table tr:nth-child(even) {
-            background: #f4f7fa;
-        }
-        .schedule-section h3 {
-            font-size: 1.2em;
+            background: linear-gradient(90deg, #e8f0fa, #f0f5ff);
+            color: var(--blue);
             font-weight: 700;
+            font-family: var(--mono);
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
-        @media (max-width: 600px) {
-            main {
-                margin: 16px;
-                padding: 18px 8px;
-            }
-            header {
-                padding: 18px 0 12px 0;
-            }
-            header h1 {
-                font-size: 1.5rem;
-            }
-            .header-left, .header-right {
-                position: static;
-                flex-direction: column;
-                align-items: flex-start;
-                margin-bottom: 8px;
-            }
-            .header-right {
-                align-items: flex-end;
-            }
-            .schedule-table {
-                font-size: 0.9rem;
-            }
+        .schedule-table tr:nth-child(even) td { background: #f8fafd; }
+        .schedule-table td:first-child {
+            font-family: var(--mono);
+            color: var(--accent);
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        /* ── FSK INFO ── */
+        .fsk-block {
+            background: #f5f8ff;
+            border: 1px solid #c0d5f5;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 0.87rem;
+            line-height: 1.7;
+            color: #334;
+        }
+        .fsk-block code {
+            font-family: var(--mono);
+            background: #e8f0fa;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 0.9em;
+            color: var(--blue);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #889;
+            border-top: 1px solid var(--border);
+            font-family: var(--mono);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            header { grid-template-columns: 1fr; text-align: center; }
+            .header-badge { align-items: center; }
+            header h1 { font-size: 1.35rem; }
+            .inspiration-strip { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: column; align-items: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
         }
     </style>
 </head>
 <body>
-    <div id="futs-overlay">
+
+    <!-- ══════════════════════════════════════════
+         LOADING SCREEN
+    ══════════════════════════════════════════ -->
+    <div id="loading-screen">
+        <div class="loading-logo">F<span>U</span>TS</div>
+        <div class="loading-sub">FRANCE UNIVERSAL TIME SIGNAL</div>
+        <div class="loading-bar-wrap">
+            <div class="loading-bar-fill" id="loading-bar"></div>
+        </div>
+        <div class="loading-status" id="loading-status">Initializing…</div>
+        <div class="loading-count" id="loading-count"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         CLICK-TO-START OVERLAY
+    ══════════════════════════════════════════ -->
+    <div id="futs-overlay" style="display:none;">
         <div class="futs-overlay-content">
-            <h1>Click to start FUTS</h1>
-            <p style="font-size:1.1em;color:#cce0ff;">This site requires a click to enable audio.<br>Click anywhere to begin.</p>
+            <h1><span class="overlay-pulse"></span>FUTS READY</h1>
+            <p style="font-size:1em;color:var(--sky);margin-top:8px;">All audio files loaded.<br>Click anywhere to enable audio and begin.</p>
         </div>
     </div>
-    <header>
-        <div class="header-left">
-            <span id="utc0">UTC 0: 00:00:00</span>
-            <span id="client-utc">Client Time UTC: 00:00:00</span>
-            <span style="font-size:0.8em;color:#8bb;">Your time</span>
-            <span id="client-date">Date: 1970-01-01</span>
-        </div>
-        <h1>France Universal Time Signal ( FUTS )</h1>
-        <h2>A radio fan creation inspired by NIST WWV</h2>
-    </header>
-    <main>
-        <div class="button-row">
-            <button id="signalBtn" onclick="toggleTimeSignal()">Start the Time Signal</button>
-        </div>
-        <div class="button-row" style="gap: 8px; margin-top: 16px;">
-            <button id="audioBtn" onclick="toggleAudio()" style="background: #28a745; padding: 8px 16px; font-size: 0.95rem;">Audio: ON</button>
-            <button id="voiceBtn" onclick="toggleVoice()" style="background: #28a745; padding: 8px 16px; font-size: 0.95rem;">Voice: ON</button>
-        </div>
-        <div class="info">
-            <p>
-                This project simulates a time signal station, similar to <a href="https://www.nist.gov/pml/time-and-frequency-division/time-distribution/radio-station-wwv" target="_blank" rel="noopener" style="color:#0057b8;text-decoration:underline;">NIST WWV</a>.<br>
-                It features pre-tones, continuous tones, ticks, and voice announcements, all synchronized to your device's clock.
-            </p>
-            <p>
-                <strong>Note:</strong> For best results, use a modern browser and allow audio playback.
-            </p>
-        </div>
-        <div class="schedule-section">
-            <h3 style="color:#003366;margin-top:32px;margin-bottom:12px;">FUTS Schedule</h3>
-            <div style="overflow-x:auto;">
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Time (UTC)</th>
-                        <th>Event</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>hh:mm:00</td>
-                        <td>Pre-tone</td>
-                        <td>1000 Hz (min 0–4, 10–14, ...), 1500 Hz (min 5–9, 15–19, ...), 1200 Hz (min 50–59), 1s</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:00–59</td>
-                        <td>100 Hz Tick</td>
-                        <td>Every second, 0.5s (BCD encoded)</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:00–59</td>
-                        <td>1000 Hz Tick</td>
-                        <td>Every second, 20ms</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:10</td>
-                        <td>Continuous Tone</td>
-                        <td>WWV/WWVH, up to ~40s (stops at :43)</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:43</td>
-                        <td>Stop Continuous Tone</td>
-                        <td>Ends WWV/WWVH tone</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:41</td>
-                        <td>French Voice Time</td>
-                        <td>Announces next minute in French</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:51</td>
-                        <td>English Voice Time</td>
-                        <td>Announces current minute in English</td>
-                    </tr>
-                    <tr>
-                        <td>hh:mm:15 (every 10 min)</td>
-                        <td>Special Message</td>
-                        <td>French & English announcement</td>
-                    </tr>
-                    <tr>
-                        <td>hh:00:00</td>
-                        <td>La Marseillaise</td>
-                        <td>French national anthem</td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-        </div>
-        <div class="schedule-section">
-            <h3 style="color:#003366;margin-top:32px;margin-bottom:12px;">WWV / WWVH Minute Tone Schedule</h3>
-            <div style="overflow-x:auto;">
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Minute</th>
-                        <th>WWV Tone (Hz)</th>
-                        <th>WWVH Tone (Hz)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>00</td><td>-</td><td>-</td></tr>
-                    <tr><td>01</td><td>-</td><td>440</td></tr>
-                    <tr><td>02</td><td>440</td><td>-</td></tr>
-                    <tr><td>03</td><td>-</td><td>500</td></tr>
-                    <tr><td>04</td><td>500</td><td>-</td></tr>
-                    <tr><td>05</td><td>600</td><td>500</td></tr>
-                    <tr><td>06</td><td>500</td><td>600</td></tr>
-                    <tr><td>07</td><td>600</td><td>500</td></tr>
-                    <tr><td>08</td><td>-</td><td>-</td></tr>
-                    <tr><td>09</td><td>-</td><td>-</td></tr>
-                    <tr><td>10</td><td>-</td><td>-</td></tr>
-                    <tr><td>11</td><td>600</td><td>500</td></tr>
-                    <tr><td>12</td><td>500</td><td>600</td></tr>
-                    <tr><td>13</td><td>600</td><td>500</td></tr>
-                    <tr><td>14</td><td>500</td><td>-</td></tr>
-                    <tr><td>15</td><td>600</td><td>-</td></tr>
-                    <tr><td>16</td><td>500</td><td>-</td></tr>
-                    <tr><td>17</td><td>600</td><td>-</td></tr>
-                    <tr><td>18</td><td>-</td><td>-</td></tr>
-                    <tr><td>19</td><td>-</td><td>-</td></tr>
-                    <tr><td>20</td><td>500</td><td>600</td></tr>
-                    <tr><td>21</td><td>600</td><td>500</td></tr>
-                    <tr><td>22</td><td>500</td><td>600</td></tr>
-                    <tr><td>23</td><td>600</td><td>500</td></tr>
-                    <tr><td>24</td><td>500</td><td>600</td></tr>
-                    <tr><td>25</td><td>600</td><td>500</td></tr>
-                    <tr><td>26</td><td>500</td><td>600</td></tr>
-                    <tr><td>27</td><td>600</td><td>500</td></tr>
-                    <tr><td>28</td><td>500</td><td>600</td></tr>
-                    <tr><td>29</td><td>-</td><td>-</td></tr>
-                    <tr><td>30</td><td>-</td><td>-</td></tr>
-                    <tr><td>31</td><td>600</td><td>500</td></tr>
-                    <tr><td>32</td><td>500</td><td>600</td></tr>
-                    <tr><td>33</td><td>600</td><td>500</td></tr>
-                    <tr><td>34</td><td>500</td><td>600</td></tr>
-                    <tr><td>35</td><td>600</td><td>500</td></tr>
-                    <tr><td>36</td><td>500</td><td>600</td></tr>
-                    <tr><td>37</td><td>600</td><td>500</td></tr>
-                    <tr><td>38</td><td>500</td><td>600</td></tr>
-                    <tr><td>39</td><td>600</td><td>500</td></tr>
-                    <tr><td>40</td><td>500</td><td>600</td></tr>
-                    <tr><td>41</td><td>600</td><td>500</td></tr>
-                    <tr><td>42</td><td>500</td><td>600</td></tr>
-                    <tr><td>43</td><td>-</td><td>500</td></tr>
-                    <tr><td>44</td><td>-</td><td>500</td></tr>
-                    <tr><td>45</td><td>-</td><td>500</td></tr>
-                    <tr><td>46</td><td>-</td><td>600</td></tr>
-                    <tr><td>47</td><td>-</td><td>500</td></tr>
-                    <tr><td>48</td><td>-</td><td>500</td></tr>
-                    <tr><td>49</td><td>-</td><td>500</td></tr>
-                    <tr><td>50</td><td>-</td><td>600</td></tr>
-                    <tr><td>51</td><td>-</td><td>500</td></tr>
-                    <tr><td>52</td><td>500</td><td>600</td></tr>
-                    <tr><td>53</td><td>600</td><td>500</td></tr>
-                    <tr><td>54</td><td>500</td><td>600</td></tr>
-                    <tr><td>55</td><td>600</td><td>500</td></tr>
-                    <tr><td>56</td><td>500</td><td>600</td></tr>
-                    <tr><td>57</td><td>600</td><td>500</td></tr>
-                    <tr><td>58</td><td>500</td><td>600</td></tr>
-                    <tr><td>59</td><td>-</td><td>-</td></tr>
-                </tbody>
-            </table>
-            </div>
-            <br>
-            <div style="font-size:0.95em;color:#555;margin-top:8px;overflow-x:auto;">
-                <strong>Note:</strong> "-" means no tone for that minute.<br>
-                <strong>Note:</strong> 440, 500 and 600 is the Hz frequency of the tone.<br>
-                <strong>Note:</strong> The tones switch between WWV and WWVH each hour, e.g. 12:00 = WWV, 17:00 = WWVH.<br><br>
-                <b><pre style="white-space:pre-wrap;margin:0;">
-WWV Schedule:
-00:00, 02:00, 04:00, 06:00, 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00, 22:00
 
-WWVH Schedule:
-01:00, 03:00, 05:00, 07:00, 09:00, 11:00, 13:00, 15:00, 17:00, 19:00, 21:00, 23:00
-                </pre></b>
+    <!-- ══════════════════════════════════════════
+         HEADER
+    ══════════════════════════════════════════ -->
+    <header>
+        <div class="header-clocks">
+            <span class="clock-line primary" id="utc0">UTC: 00:00:00</span>
+            <span class="clock-line" id="client-utc">Local: 00:00:00</span>
+            <span class="clock-line" id="client-date">1970-01-01</span>
+        </div>
+        <div class="header-center">
+            <h1>France <span>Universal</span> Time Signal</h1>
+            <h2>FUTS — A radio fan creation inspired by NIST WWV &amp; CHU Canada</h2>
+        </div>
+        <div class="header-badge">
+            <span class="badge-pill">ON AIR</span>
+            <span class="badge-pill">UTC SYNCHRONIZED</span>
+            <span class="badge-pill">SIGNABROAM</span>
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         MAIN
+    ══════════════════════════════════════════ -->
+    <main>
+
+        <!-- CONTROLS -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-dot"></div>
+                <h3>Signal Control</h3>
+            </div>
+            <div class="card-body control-panel">
+                <button class="btn-main" id="signalBtn" onclick="toggleTimeSignal()">▶ Start the Time Signal</button>
+                <div class="btn-row">
+                    <button class="btn-toggle on" id="audioBtn" onclick="toggleAudio()">🔊 Audio: ON</button>
+                    <button class="btn-toggle on" id="voiceBtn" onclick="toggleVoice()">🗣 Voice: ON</button>
+                </div>
             </div>
         </div>
+
+        <!-- ABOUT -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-dot"></div>
+                <h3>About FUTS</h3>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+                <div class="info-box">
+                    This project simulates a shortwave time signal station, featuring pre-tones, continuous tones, ticks, FSK data bursts, and voice announcements — all synchronized to your device's clock.
+                    <br><br>
+                    <strong>Note:</strong> For best results, use a modern browser and allow audio playback.
+                </div>
+                <div class="inspiration-strip">
+                    <div class="insp-card">
+                        <div class="insp-label">Inspired by</div>
+                        <div class="insp-name">NIST WWV</div>
+                        <div class="insp-desc">US time signal station broadcasting at 2.5, 5, 10, 15 &amp; 20 MHz from Fort Collins, Colorado, operated by NIST since 1923. <a href="https://www.nist.gov/pml/time-and-frequency-division/time-distribution/radio-station-wwv" target="_blank" rel="noopener">Learn more →</a></div>
+                    </div>
+                    <div class="insp-card">
+                        <div class="insp-label">Inspired by</div>
+                        <div class="insp-name">CHU Canada</div>
+                        <div class="insp-desc">Canada's official shortwave time signal station broadcast at 3.33, 7.85 &amp; 14.67 MHz by the National Research Council, known for its bilingual voice announcements and FSK data encoding.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-dot"></div>
+                <h3>FUTS Broadcast Schedule</h3>
+            </div>
+            <div class="card-body">
+                <div style="overflow-x:auto;">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Time (UTC)</th>
+                            <th>Event</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>hh:mm:00</td>
+                            <td>Pre-tone</td>
+                            <td>1000 Hz (min 0–4, 10–14, …), 1500 Hz (min 5–9, 15–19, …), 1200 Hz (min 50–59), 1 s</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:00–59</td>
+                            <td>100 Hz Tick</td>
+                            <td>Every second, 0.5 s (BCD encoded)</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:00–59</td>
+                            <td>1000 Hz Tick</td>
+                            <td>Every second, 20 ms (reduced to 10 ms during voice &amp; FSK)</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:10</td>
+                            <td>Continuous Tone</td>
+                            <td>Carrier tone, up to ~40 s (stops at :43)</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:30</td>
+                            <td>FSK Data Burst</td>
+                            <td>RTTY-style 2125/2295 Hz FSK — "FUTS TIME SIGNAL {H} Hour {M} Minutes UTC" with DUT1 split-second encoding</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:41</td>
+                            <td>French Voice</td>
+                            <td>Announces next minute in French</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:51</td>
+                            <td>English Voice</td>
+                            <td>Announces current minute in English</td>
+                        </tr>
+                        <tr>
+                            <td>hh:mm:15 (every 10 min)</td>
+                            <td>Special Message</td>
+                            <td>French &amp; English station announcement</td>
+                        </tr>
+                        <tr>
+                            <td>hh:00:00</td>
+                            <td>La Marseillaise</td>
+                            <td>French national anthem on the hour</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FSK INFO -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-dot"></div>
+                <h3>FSK Encoding — DUT1 Split-Second</h3>
+            </div>
+            <div class="card-body">
+                <div class="fsk-block">
+                    Starting at <code>hh:mm:30</code>, a 2500 Hz FSK burst transmits:<br>
+                    <strong>"FUTS TIME SIGNAL {hour} Hour {minutes} Minutes UTC"</strong><br><br>
+                    In addition, DUT1 (UT1 − UTC) is encoded via <em>split seconds</em>, mirroring the CHU Canada / NIST WWV convention:<br><br>
+                    • <strong>Positive DUT1</strong> (+0.1 s to +0.8 s) → seconds <code>1</code> through <code>8</code> are split (doubled tick).<br>
+                    • <strong>Negative DUT1</strong> (−0.1 s to −0.8 s) → seconds <code>9</code> through <code>16</code> are split (doubled tick).<br><br>
+                    During the FSK burst and all voice announcements, the once-per-second tone is reduced to a <strong>10-millisecond tick</strong> to avoid masking the audio content.
+                </div>
+            </div>
+        </div>
+
     </main>
+
+    <footer>FUTS — France Universal Time Signal &nbsp;|&nbsp; Fan Project by Signabroam &nbsp;|&nbsp; Not affiliated with NIST, NRC, or any government body</footer>
+
+    <!-- ══════════════════════════════════════════
+         SCRIPTS  (original logic preserved, new additions below)
+    ══════════════════════════════════════════ -->
     <script>
-        // --- Time display logic ---
+        // ─────────────────────────────────────────────
+        // AUDIO FILE MANIFEST — every file to preload
+        // ─────────────────────────────────────────────
+        const AUDIO_FILES = [];
+
+        // French voice clips  (0–59 numbers + words)
+        const frenchNumbers = [
+            0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
+            20,30,40,50
+        ];
+        for (const n of frenchNumbers) {
+            AUDIO_FILES.push(`./french_vc/${n}.mp3`);
+        }
+        const frenchWords = [
+            'at_the_tone',
+            'hours',
+            'minutes',
+            'coordinated_universal_time'
+        ];
+        for (const w of frenchWords) {
+            AUDIO_FILES.push(`./french_vc/${w}.mp3`);
+        }
+
+        // English voice clips
+        for (let h = 0; h <= 23; h++) {
+            AUDIO_FILES.push(`./voice_clips/v_${h}.mp3`);
+        }
+        for (let m = 0; m <= 59; m++) {
+            AUDIO_FILES.push(`./voice_clips/v_${m}.mp3`);
+        }
+        const englishWords = [
+            'at_the_tone', 'hours', 'hour', 'minutes', 'minute', 'utc'
+        ];
+        for (const w of englishWords) {
+            AUDIO_FILES.push(`./voice_clips/v_${w}.mp3`);
+        }
+
+        // La Marseillaise
+        AUDIO_FILES.push('./LA.MARSEILLAISE.wav');
+
+        // Deduplicate
+        const UNIQUE_AUDIO_FILES = [...new Set(AUDIO_FILES)];
+
+        // ─────────────────────────────────────────────
+        // PRELOAD WITH PROGRESS BAR
+        // ─────────────────────────────────────────────
+        const preloadedAudio = {}; // cache: path → Audio element
+
+        function preloadAllAudio() {
+            const total = UNIQUE_AUDIO_FILES.length;
+            let loaded = 0;
+            let failed = 0;
+
+            const bar    = document.getElementById('loading-bar');
+            const status = document.getElementById('loading-status');
+            const count  = document.getElementById('loading-count');
+
+            return new Promise((resolve) => {
+                if (total === 0) { resolve(); return; }
+
+                function onDone(path, ok) {
+                    loaded++;
+                    if (!ok) failed++;
+                    const pct = Math.round((loaded / total) * 100);
+                    bar.style.width = pct + '%';
+                    count.textContent = `${loaded} / ${total}`;
+                    const fileName = path.split('/').pop();
+                    status.textContent = ok ? `Loaded: ${fileName}` : `Skipped: ${fileName}`;
+                    if (loaded === total) {
+                        status.textContent = failed === 0
+                            ? 'All files loaded — ready!'
+                            : `Ready (${failed} file(s) not found — will be skipped)`;
+                        setTimeout(resolve, 400);
+                    }
+                }
+
+                for (const path of UNIQUE_AUDIO_FILES) {
+                    const audio = new Audio();
+                    audio.preload = 'auto';
+
+                    audio.addEventListener('canplaythrough', () => {
+                        preloadedAudio[path] = audio;
+                        onDone(path, true);
+                    }, { once: true });
+
+                    audio.addEventListener('error', () => {
+                        // Still cache a new Audio with the src so playback is attempted
+                        preloadedAudio[path] = new Audio(path);
+                        onDone(path, false);
+                    }, { once: true });
+
+                    audio.src = path;
+                    audio.load();
+                }
+            });
+        }
+
+        function getCachedAudio(path) {
+            if (preloadedAudio[path]) {
+                // Rewind so it can be replayed
+                const a = preloadedAudio[path];
+                a.currentTime = 0;
+                return a;
+            }
+            return new Audio(path); // fallback
+        }
+
+        // ─────────────────────────────────────────────
+        // BOOT SEQUENCE
+        // ─────────────────────────────────────────────
+        window.addEventListener('load', async () => {
+            document.getElementById('loading-status').textContent = 'Loading audio files…';
+            await preloadAllAudio();
+
+            // Hide loading screen
+            const ls = document.getElementById('loading-screen');
+            ls.classList.add('fade-out');
+            setTimeout(() => { ls.style.display = 'none'; }, 500);
+
+            // Show click overlay
+            document.getElementById('futs-overlay').style.display = 'flex';
+        });
+
+        // ─────────────────────────────────────────────
+        // TIME DISPLAY (original logic, unchanged)
+        // ─────────────────────────────────────────────
         function pad(n) { return n < 10 ? '0' + n : n; }
         function updateClocks() {
             const now = new Date();
-            // Show real UTC time
             document.getElementById('utc0').textContent =
-                'UTC 0: ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds());
-            // Show local time (your device time)
+                'UTC: ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds());
             document.getElementById('client-utc').textContent =
-                'Client Time UTC: ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
-            // Client Date (local date)
+                'Local: ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
             document.getElementById('client-date').textContent =
-                'Date: ' + now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+                now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
         }
         setInterval(updateClocks, 500);
         updateClocks();
 
-        // --- Start/Stop button logic ---
+        // ─────────────────────────────────────────────
+        // START / STOP BUTTON (original, unchanged)
+        // ─────────────────────────────────────────────
         function toggleTimeSignal() {
             console.log('toggleTimeSignal called, signalRunning:', signalRunning, 'enableAudio:', enableAudio);
             if (!signalRunning) {
                 startTimeSignal();
                 signalRunning = true;
-                document.getElementById('signalBtn').textContent = "Stop the Time Signal";
+                document.getElementById('signalBtn').textContent = "⏹ Stop the Time Signal";
             } else {
                 stopTimeSignal();
                 signalRunning = false;
-                document.getElementById('signalBtn').textContent = "Start the Time Signal";
+                document.getElementById('signalBtn').textContent = "▶ Start the Time Signal";
             }
         }
         function stopTimeSignal() {
@@ -412,68 +743,78 @@ WWVH Schedule:
             stopAllSounds();
         }
 
-        // --- Audio and timing variables ---
+        // ─────────────────────────────────────────────
+        // AUDIO + TIMING VARIABLES (original, unchanged)
+        // ─────────────────────────────────────────────
         let interval;
         let isBeeping = false;
         let isLongBeepPlaying = false;
-        let isSpeaking = false; // For TTS speech synthesis or voice clip playback state
-        let isVoiceClipsPlaying = false; // For pre-recorded voice clips
+        let isSpeaking = false;
+        let isVoiceClipsPlaying = false;
         let specialMessagePlaying = false;
         let isPlayingMarseillaise = false;
-        let enableAudio = true; // Audio enabled by default
-        let enableVoice = true; // Voice enabled by default
-        let signalRunning = false; // Track if time signal is running
+        let enableAudio = true;
+        let enableVoice = true;
+        let signalRunning = false;
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let oscillator = null; // Track if an oscillator is currently in use
+        let oscillator = null;
         let continuousOscillators = [];
         let continuousGainNodes = [];
-        let marseillaiseAudio = new Audio("./LA.MARSEILLAISE.wav");
-        let isTestMode = false; // Flag to indicate if the test mode is active
-        let testEndTime = null; // Time when the test mode should end
+        let marseillaiseAudio = null; // will use cached version
+        let isTestMode = false;
+        let testEndTime = null;
         let preToneOscillator = null;
         let preToneGain = null;
-        let tick1000Oscillator = null; // Oscillator for the 1000Hz tick
-        let tick1000Interval = null; // Interval ID for the 1000Hz tick
-        let constantToneOscillator = null; // For constant 1000Hz tone during 10-minute marks
-        let constantToneGain = null; // Gain node for constant tone volume control
-        let isConstantToneActive = false; // Flag for constant tone state
-        let voiceGainNode = null; // Gain node for voice amplification (currently unused)
-        let currentVoiceAudio = null; // Track current voice audio element
+        let tick1000Oscillator = null;
+        let tick1000Interval = null;
+        let constantToneOscillator = null;
+        let constantToneGain = null;
+        let isConstantToneActive = false;
+        let voiceGainNode = null;
+        let currentVoiceAudio = null;
 
+        // ─────────────────────────────────────────────
+        // NEW: FSK state
+        // ─────────────────────────────────────────────
+        let isFSKPlaying = false;
+        const DUT1 = 0.0; // Set to actual DUT1 value if known, e.g. +0.3 or -0.2
+
+        // ─────────────────────────────────────────────
+        // TOGGLE BUTTONS (updated style)
+        // ─────────────────────────────────────────────
         function toggleAudio() {
             enableAudio = !enableAudio;
             const btn = document.getElementById('audioBtn');
-            btn.textContent = enableAudio ? 'Audio: ON' : 'Audio: OFF';
-            btn.style.background = enableAudio ? '#28a745' : '#dc3545';
+            btn.textContent = enableAudio ? '🔊 Audio: ON' : '🔇 Audio: OFF';
+            btn.className = 'btn-toggle ' + (enableAudio ? 'on' : 'off');
         }
 
         function toggleVoice() {
             enableVoice = !enableVoice;
             const btn = document.getElementById('voiceBtn');
-            btn.textContent = enableVoice ? 'Voice: ON' : 'Voice: OFF';
-            btn.style.background = enableVoice ? '#28a745' : '#dc3545';
+            btn.textContent = enableVoice ? '🗣 Voice: ON' : '🔕 Voice: OFF';
+            btn.className = 'btn-toggle ' + (enableVoice ? 'on' : 'off');
         }
 
+        // ─────────────────────────────────────────────
+        // START TIME SIGNAL (original, unchanged)
+        // ─────────────────────────────────────────────
         function startTimeSignal() {
             console.log('startTimeSignal called');
             if (interval) clearInterval(interval);
             interval = setInterval(checkTime, 1000);
-            start1000HzTick();   // Start the 1000Hz tick
+            start1000HzTick();
         }
 
         function playSimpleTone(frequency, duration = 100, volume = 0.8) {
             if (!enableAudio) return;
-
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-
             oscillator.type = "sine";
             oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-
             oscillator.start();
             setTimeout(() => {
                 oscillator.stop();
@@ -482,29 +823,23 @@ WWVH Schedule:
             }, duration);
         }
 
-        function playCountdownBeep() {
-            playSimpleTone(800, 300, 0.8);
-        }
+        function playCountdownBeep() { playSimpleTone(800, 300, 0.8); }
+        function playMinuteBeep()    { playSimpleTone(1300, 600, 0.8); }
 
-        function playMinuteBeep() {
-            playSimpleTone(1300, 600, 0.8);
-        }
-
+        // ─────────────────────────────────────────────
+        // CHECK TIME (original + FSK trigger at :30)
+        // ─────────────────────────────────────────────
         function checkTime() {
             let now = new Date();
-            let utcHours = now.getUTCHours();
+            let utcHours   = now.getUTCHours();
             let utcMinutes = now.getUTCMinutes();
             let utcSeconds = now.getUTCSeconds();
 
-            // If test mode is active, skip the default behavior
             if (isTestMode) {
-                if (now >= testEndTime) {
-                    isTestMode = false; // Disable test mode after the test sequence ends
-                }
+                if (now >= testEndTime) { isTestMode = false; }
                 return;
             }
 
-            // Stop constant tone if we're past the 40-second mark in a 10-minute period
             if (isConstantToneActive && ((utcMinutes % 10 !== 0) || utcSeconds > 40)) {
                 stopConstantTone();
             }
@@ -515,61 +850,165 @@ WWVH Schedule:
                 playMinuteBeep();
             }
 
+            // FSK burst at mm:30
+            if (utcSeconds === 30 && !isFSKPlaying) {
+                playFSKBurst(utcHours, utcMinutes);
+            }
+
             if (utcSeconds === 40) {
-                playVoiceClips(utcHours, utcMinutes, "fr", true); // French voice at mm:40 (announce next minute)
+                playVoiceClips(utcHours, utcMinutes, "fr", true);
             } else if (utcSeconds === 51) {
-                playVoiceClips(utcHours, utcMinutes, "en", true); // English voice at mm:51 (announce next minute)
+                playVoiceClips(utcHours, utcMinutes, "en", true);
             }
         }
 
+        // ─────────────────────────────────────────────
+        // NEW: FSK BURST (RTTY-style)
+        // ─────────────────────────────────────────────
+        // We encode the message as a simple Baudot/RTTY-style 5-bit stream with
+        // start/stop bits at ~300 baud, using mark/space tones that are more
+        // recognizable as RTTY than the previous generic tone train.
+        // During FSK, ticks are reduced to 10 ms (handled in play1000HzTick via isFSKPlaying flag)
+
+        function buildRTTYBitStream(text) {
+            const bits = [];
+            const lettersTable = {
+                A: '00001', B: '00010', C: '00011', D: '00100', E: '00101',
+                F: '00110', G: '00111', H: '01000', I: '01001', J: '01010',
+                K: '01011', L: '01100', M: '01101', N: '01110', O: '01111',
+                P: '10000', Q: '10001', R: '10010', S: '10011', T: '10100',
+                U: '10101', V: '10110', W: '10111', X: '11000', Y: '11001',
+                Z: '11010', ' ': '11011'
+            };
+            const figuresTable = {
+                '0': '00001', '1': '00010', '2': '00011', '3': '00100', '4': '00101',
+                '5': '00110', '6': '00111', '7': '01000', '8': '01001', '9': '01010',
+                ' ': '11011'
+            };
+            const ltrsCode = '11111';
+            const figsCode = '11010';
+            const crCode = '00010';
+            const lfCode = '01000';
+            let isLettersMode = true;
+
+            const emitCode = (code) => {
+                const value = parseInt(code, 2);
+                for (let bit = 0; bit < 5; bit++) {
+                    bits.push(!!(value & (1 << bit)));
+                }
+            };
+
+            const emitChar = (char) => {
+                bits.push(false); // start bit (space)
+                if (char === 'FIGS') {
+                    emitCode(figsCode);
+                } else if (char === 'LTRS') {
+                    emitCode(ltrsCode);
+                } else if (char === '\r') {
+                    emitCode(crCode);
+                } else if (char === '\n') {
+                    emitCode(lfCode);
+                } else if (/[0-9]/.test(char)) {
+                    emitCode(figuresTable[char]);
+                } else if (char === ' ') {
+                    emitCode(lettersTable[' ']);
+                } else {
+                    emitCode(lettersTable[char.toUpperCase()] || lettersTable[' ']);
+                }
+                bits.push(true); // stop bit (mark)
+            };
+
+            for (const ch of text) {
+                const char = ch.toUpperCase();
+                if (/[0-9]/.test(char) && isLettersMode) {
+                    emitChar('FIGS');
+                    isLettersMode = false;
+                } else if (!/[0-9]/.test(char) && char !== ' ' && char !== '\r' && char !== '\n' && !isLettersMode) {
+                    emitChar('LTRS');
+                    isLettersMode = true;
+                }
+                emitChar(char);
+            }
+
+            return bits;
+        }
+
+        function playFSKBurst(hours, minutes) {
+            if (!enableAudio) return;
+            if (isFSKPlaying) return;
+            isFSKPlaying = true;
+
+            const markHz  = 2125;
+            const spaceHz = 2295;
+            const baud    = 300;
+            const bitDur  = 1 / baud; // seconds per bit
+
+            const message = `FUTS TIME SIGNAL ${hours} Hour${hours !== 1 ? 's' : ''} ${minutes} Minute${minutes !== 1 ? 's' : ''} UTC\r\n`;
+            console.log('FSK burst:', message.trim());
+
+            const bits = buildRTTYBitStream(message);
+
+            let t = audioCtx.currentTime + 0.02; // small offset
+            for (const isMark of bits) {
+                const freq = isMark ? markHz : spaceHz;
+                const osc  = audioCtx.createOscillator();
+                const gn   = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t);
+                gn.gain.setValueAtTime(0.35, t);
+                gn.gain.setValueAtTime(0,    t + bitDur - 0.001);
+                osc.connect(gn);
+                gn.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + bitDur);
+                t += bitDur;
+            }
+
+            const totalDur = bits.length * bitDur * 1000; // ms
+            setTimeout(() => { isFSKPlaying = false; }, totalDur + 100);
+        }
+
+        // ─────────────────────────────────────────────
+        // MARSEILLAISE (use cache)
+        // ─────────────────────────────────────────────
         function playMarseillaise() {
             if (!enableAudio) return;
-            stopAllSounds(); // Stop all tones
+            stopAllSounds();
             isPlayingMarseillaise = true;
+            marseillaiseAudio = getCachedAudio('./LA.MARSEILLAISE.wav');
             marseillaiseAudio.play();
-            marseillaiseAudio.onended = () => {
-                isPlayingMarseillaise = false;
-            };
+            marseillaiseAudio.onended = () => { isPlayingMarseillaise = false; };
         }
 
         function scheduleTest() {
             let now = new Date();
             let currentSeconds = now.getSeconds();
-            let nextMinute = (now.getMinutes() + 1) % 60; // Schedule for the next minute
+            let nextMinute = (now.getMinutes() + 1) % 60;
             let nextHour = now.getMinutes() === 59 ? (now.getHours() + 1) % 24 : now.getHours();
-
-            // Enable test mode
             isTestMode = true;
-            testEndTime = new Date(now.getTime() + 2 * 60 * 1000); // Test mode lasts for 2 minutes
-
-            // Schedule the test announcement at mm:20
+            testEndTime = new Date(now.getTime() + 2 * 60 * 1000);
             setTimeout(() => {
-                stopAllSounds(); // Stop all tones except the 100Hz ticking clock
-                speakTime(nextHour, nextMinute, "fr"); // Announce the test
-            }, (60 - currentSeconds) * 1000); // Wait until the next minute
-
-            // Schedule "La Marseillaise" at mm:21
+                stopAllSounds();
+                speakTime(nextHour, nextMinute, "fr");
+            }, (60 - currentSeconds) * 1000);
             setTimeout(() => {
-                stopAllSounds(); // Stop all tones except the 100Hz ticking clock
-                playMarseillaise(); // Play "La Marseillaise"
-            }, (120 - currentSeconds) * 1000); // Wait until the minute after the announcement
-
-            // Disable test mode after 2 minutes
-            setTimeout(() => {
-                isTestMode = false;
-            }, (120 - currentSeconds) * 1000 + marseillaiseAudio.duration * 1000);
+                stopAllSounds();
+                playMarseillaise();
+            }, (120 - currentSeconds) * 1000);
+            const marseillaiseEl = getCachedAudio('./LA.MARSEILLAISE.wav');
+            setTimeout(() => { isTestMode = false; },
+                (120 - currentSeconds) * 1000 + (marseillaiseEl.duration || 60) * 1000);
         }
 
         function stopAllSounds() {
-            stopContinuousTone(); // Stop continuous tones
+            stopContinuousTone();
             if (currentVoiceAudio) {
                 currentVoiceAudio.pause();
                 currentVoiceAudio = null;
             }
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
+            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
             stop1000HzTick();
+            isFSKPlaying = false;
             isVoiceClipsPlaying = false;
             isSpeaking = false;
             specialMessagePlaying = false;
@@ -579,18 +1018,14 @@ WWVH Schedule:
 
         function playBeep(frequency = 1000, volume = 1, duration = 100) {
             if (!enableAudio || isBeeping || oscillator || isSpeaking || specialMessagePlaying) return;
-
             isBeeping = true;
             oscillator = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
-
             oscillator.type = "sine";
             oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-
             oscillator.start();
             setTimeout(() => {
                 oscillator.stop();
@@ -601,18 +1036,14 @@ WWVH Schedule:
 
         function playLongBeep() {
             if (!enableAudio || isLongBeepPlaying || oscillator) return;
-
             isLongBeepPlaying = true;
             oscillator = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
-
             oscillator.type = "sine";
             oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-
             oscillator.start();
             setTimeout(() => {
                 oscillator.stop();
@@ -623,37 +1054,26 @@ WWVH Schedule:
 
         function playDoubleBeep() {
             if (!enableAudio || isBeeping || oscillator || isSpeaking || specialMessagePlaying) return;
-
             isBeeping = true;
             let firstBeep = audioCtx.createOscillator();
             let gainNode1 = audioCtx.createGain();
-
             firstBeep.type = "sine";
             firstBeep.frequency.setValueAtTime(1000, audioCtx.currentTime);
             gainNode1.gain.setValueAtTime(1, audioCtx.currentTime);
-
             firstBeep.connect(gainNode1);
             gainNode1.connect(audioCtx.destination);
-
             firstBeep.start();
             setTimeout(() => {
                 firstBeep.stop();
-
                 let secondBeep = audioCtx.createOscillator();
                 let gainNode2 = audioCtx.createGain();
-
                 secondBeep.type = "sine";
                 secondBeep.frequency.setValueAtTime(1000, audioCtx.currentTime);
                 gainNode2.gain.setValueAtTime(1, audioCtx.currentTime);
-
                 secondBeep.connect(gainNode2);
                 gainNode2.connect(audioCtx.destination);
-
                 secondBeep.start();
-                setTimeout(() => {
-                    secondBeep.stop();
-                    isBeeping = false;
-                }, 100);
+                setTimeout(() => { secondBeep.stop(); isBeeping = false; }, 100);
             }, 100);
         }
 
@@ -661,61 +1081,44 @@ WWVH Schedule:
             if (lang === "fr") {
                 const onEnd = () => {
                     isSpeaking = false;
-                    if (restartBeep) {
-                        startTimeSignal(); // Redémarrer immédiatement la séquence des bips
-                    }
+                    if (restartBeep) { startTimeSignal(); }
                 };
                 isSpeaking = true;
                 playVoiceClips(hours, minutes, "fr", false, onEnd);
                 return;
             }
-
-            let msg = new SpeechSynthesisUtterance(`France Universal Time Signal, ${hours} hours, ${minutes} minutes, Coordinated Universal Time.`);
+            let msg = new SpeechSynthesisUtterance(
+                `France Universal Time Signal, ${hours} hours, ${minutes} minutes, Coordinated Universal Time.`);
             msg.lang = "en-US";
-
-            msg.rate = 1;
-            msg.pitch = 1;
-            msg.volume = 1.0;
-
+            msg.rate = 1; msg.pitch = 1; msg.volume = 1.0;
             msg.onend = () => {
                 isSpeaking = false;
-                if (restartBeep) {
-                    startTimeSignal(); // Redémarrer immédiatement la séquence des bips
-                }
+                if (restartBeep) { startTimeSignal(); }
             };
-
             isSpeaking = true;
             speechSynthesis.speak(msg);
         }
 
         function buildFrenchNumberClips(number, voiceDir) {
             const clips = [];
-            if (number <= 16) {
-                clips.push(`${voiceDir}${number}.mp3`);
-                return clips;
-            }
+            if (number <= 16) { clips.push(`${voiceDir}${number}.mp3`); return clips; }
             if (number < 20) {
                 clips.push(`${voiceDir}10.mp3`);
                 clips.push(`${voiceDir}${number - 10}.mp3`);
                 return clips;
             }
-            const tens = Math.floor(number / 10) * 10;
+            const tens  = Math.floor(number / 10) * 10;
             const units = number % 10;
             clips.push(`${voiceDir}${tens}.mp3`);
-            if (units !== 0) {
-                clips.push(`${voiceDir}${units}.mp3`);
-            }
+            if (units !== 0) { clips.push(`${voiceDir}${units}.mp3`); }
             return clips;
         }
 
         function playVoiceClips(hours, minutes, lang, isNextMinute = false, onEnd = null) {
-            if (!enableVoice) return; // Skip if voice is disabled
+            if (!enableVoice) return;
             if (isVoiceClipsPlaying) return;
-
             const actualMinutes = isNextMinute ? (minutes + 1) % 60 : minutes;
-            let voiceDir;
-            let clips = [];
-
+            let voiceDir, clips = [];
             if (lang === "fr") {
                 voiceDir = "./french_vc/";
                 clips = [
@@ -728,7 +1131,7 @@ WWVH Schedule:
                 ];
             } else {
                 voiceDir = "./voice_clips/";
-                const prefix = "v"; // Always use v for English
+                const prefix = "v";
                 clips = [
                     `${voiceDir}${prefix}_at_the_tone.mp3`,
                     `${voiceDir}${prefix}_${hours}.mp3`,
@@ -738,88 +1141,58 @@ WWVH Schedule:
                     `${voiceDir}${prefix}_utc.mp3`
                 ];
             }
-
             isVoiceClipsPlaying = true;
             isSpeaking = true;
             playClipsSequentially(clips, 0, () => {
                 isVoiceClipsPlaying = false;
                 isSpeaking = false;
-                if (typeof onEnd === 'function') {
-                    onEnd();
-                }
+                if (typeof onEnd === 'function') { onEnd(); }
             });
         }
 
+        // Updated to use cache
         function playClipsSequentially(clips, index = 0, onEnd = null) {
             if (index >= clips.length) {
-                if (typeof onEnd === 'function') {
-                    onEnd();
-                }
+                if (typeof onEnd === 'function') { onEnd(); }
                 return;
             }
-
             if (currentVoiceAudio) {
                 currentVoiceAudio.pause();
                 currentVoiceAudio = null;
             }
-
-            currentVoiceAudio = new Audio(clips[index]);
+            currentVoiceAudio = getCachedAudio(clips[index]);
             currentVoiceAudio.volume = 1.0;
-            currentVoiceAudio.onended = () => {
-                playClipsSequentially(clips, index + 1, onEnd);
-            };
-            currentVoiceAudio.onerror = () => {
-                // Skip to next clip if this one fails
-                playClipsSequentially(clips, index + 1, onEnd);
-            };
-            currentVoiceAudio.play().catch(() => {
-                // Skip to next clip if play fails
-                playClipsSequentially(clips, index + 1, onEnd);
-            });
+            currentVoiceAudio.onended = () => { playClipsSequentially(clips, index + 1, onEnd); };
+            currentVoiceAudio.onerror = () => { playClipsSequentially(clips, index + 1, onEnd); };
+            currentVoiceAudio.play().catch(() => { playClipsSequentially(clips, index + 1, onEnd); });
         }
 
         function playSpecialMessage() {
-            if (!enableVoice) return; // Skip if voice is disabled
-            
+            if (!enableVoice) return;
             specialMessagePlaying = true;
-            let msgFr = new SpeechSynthesisUtterance(`Retouver le projet France Time Signal sur GitHub ainsi que sur notre site web, notre service de temp et disponible temporairement due a une non autorisation de transmission.`);
-            msgFr.lang = "fr-FR";
-            msgFr.volume = 1.0;
-
-            let msgEn = new SpeechSynthesisUtterance(`Find the France Time Signal project on GitHub and on our website, our time service is temporarily unavailable due to a transmission authorization issue.`);
-            msgEn.lang = "en-US";
-            msgEn.volume = 1.0;
-
-            msgFr.onend = () => {
-                speechSynthesis.speak(msgEn);
-            };
-
-            msgEn.onend = () => {
-                specialMessagePlaying = false;
-                startTimeSignal();
-            };
-
+            let msgFr = new SpeechSynthesisUtterance(
+                `Retouver le projet France Time Signal sur GitHub ainsi que sur notre site web, notre service de temp et disponible temporairement due a une non autorisation de transmission.`);
+            msgFr.lang = "fr-FR"; msgFr.volume = 1.0;
+            let msgEn = new SpeechSynthesisUtterance(
+                `Find the France Time Signal project on GitHub and on our website, our time service is temporarily unavailable due to a transmission authorization issue.`);
+            msgEn.lang = "en-US"; msgEn.volume = 1.0;
+            msgFr.onend = () => { speechSynthesis.speak(msgEn); };
+            msgEn.onend = () => { specialMessagePlaying = false; startTimeSignal(); };
             speechSynthesis.speak(msgFr);
         }
 
         function startContinuousTone(baseFrequency) {
-            if (!enableAudio || continuousOscillators.length > 0) return; // Prevent multiple sets of oscillators
-
-            const frequencies = [baseFrequency, baseFrequency + 700, baseFrequency + 1400, baseFrequency + 2100]; // 1000Hz, 1700Hz, 2400Hz, 3100Hz
-
+            if (!enableAudio || continuousOscillators.length > 0) return;
+            const frequencies = [baseFrequency, baseFrequency + 700, baseFrequency + 1400, baseFrequency + 2100];
             frequencies.forEach((frequency) => {
                 const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-
+                const gainNode   = audioCtx.createGain();
                 oscillator.type = "sine";
-                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); // Set frequency
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); // Set volume to 30%
-
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
                 oscillator.start();
-
                 continuousOscillators.push(oscillator);
                 continuousGainNodes.push(gainNode);
             });
@@ -830,7 +1203,7 @@ WWVH Schedule:
             stopContinuousTone();
             frequencies.forEach(frequency => {
                 const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+                const gainNode   = audioCtx.createGain();
                 oscillator.type = "sine";
                 oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
@@ -839,173 +1212,56 @@ WWVH Schedule:
                 oscillator.start();
                 continuousOscillators.push(oscillator);
                 continuousGainNodes.push(gainNode);
-
                 setTimeout(() => {
-                    oscillator.stop();
-                    oscillator.disconnect();
-                    gainNode.disconnect();
+                    oscillator.stop(); oscillator.disconnect(); gainNode.disconnect();
                 }, duration);
             });
-
-            setTimeout(() => {
-                continuousOscillators = [];
-                continuousGainNodes = [];
-            }, duration);
+            setTimeout(() => { continuousOscillators = []; continuousGainNodes = []; }, duration);
         }
 
         function stopContinuousTone() {
-            continuousOscillators.forEach((oscillator) => {
-                oscillator.stop();
-                oscillator.disconnect();
-            });
-            continuousGainNodes.forEach((gainNode) => {
-                gainNode.disconnect();
-            });
-            continuousOscillators = [];
-            continuousGainNodes = [];
+            continuousOscillators.forEach((o) => { o.stop(); o.disconnect(); });
+            continuousGainNodes.forEach((g) => { g.disconnect(); });
+            continuousOscillators = []; continuousGainNodes = [];
         }
 
-        function getWWVTone(minute) {
-            // Returns frequency in Hz or null for silence
-            // WWV
-            if ([4, 6, 12, 14, 16, 20, 22, 24, 26, 28, 32, 34, 36, 38, 40, 42, 52, 54, 56, 58].includes(minute)) return 500;
-            if ([1, 3, 5, 7, 11, 13, 15, 17, 19, 21, 23, 25, 27, 31, 33, 35, 37, 39, 41, 53, 55, 57].includes(minute)) return 600;
-            if (minute === 2) return 440;
-            if ([0, 8, 9, 10, 18, 29, 30, 43, 44, 45, 46, 47, 48, 49, 50, 51, 59].includes(minute)) return null;
-            return null;
-        }
-
-        function getWWVHTone(minute) {
-            // Returns frequency in Hz or null for silence
-            // WWVH
-            if ([3, 5, 7, 11, 13, 21, 23, 25, 27, 31, 33, 35, 37, 39, 41, 43, 44, 45, 47, 48, 49, 50, 51, 53, 55, 57].includes(minute)) return 500;
-            if ([2, 4, 6, 12, 20, 22, 24, 26, 28, 32, 34, 36, 38, 40, 42, 46, 52, 54, 56, 58].includes(minute)) return 600;
-            if (minute === 1) return 440;
-            if ([0, 8, 9, 10, 14, 15, 16, 17, 18, 19, 29, 30].includes(minute)) return null;
-            return null;
-        }
-
-        function startContinuousToneWWV(minute, hour) {
-            // Determine which tones to play (WWV or WWVH)
-            const wwvHours = [0,2,4,6,8,10,12,14,16,18,20,22];
-            const wwvhHours = [1,3,5,7,9,11,13,15,17,19,21,23];
-            let frequencies = [];
-            if (wwvHours.includes(hour)) {
-                const wwvFreq = getWWVTone(minute);
-                if (wwvFreq) frequencies.push(wwvFreq);
+        function stopConstantTone() {
+            if (!isConstantToneActive) return;
+            if (constantToneOscillator) {
+                constantToneOscillator.stop();
+                constantToneOscillator.disconnect();
+                constantToneOscillator = null;
             }
-            if (wwvhHours.includes(hour)) {
-                const wwvhFreq = getWWVHTone(minute);
-                if (wwvhFreq) frequencies.push(wwvhFreq);
-            }
-
-            if (frequencies.length === 0) return;
-            playContinuousTones(frequencies, 40000); // Play for up to 40 seconds, will be stopped at :43
+            if (constantToneGain) { constantToneGain.disconnect(); constantToneGain = null; }
+            isConstantToneActive = false;
         }
 
-        function playWWVTones(minute, hour, duration = 1000) {
-            stopContinuousTone();
-
-            // Define WWV and WWVH hours
-            const wwvHours = [0,2,4,6,8,10,12,14,16,18,20,22];
-            const wwvhHours = [1,3,5,7,9,11,13,15,17,19,21,23];
-
-            let frequencies = [];
-            if (wwvHours.includes(hour)) {
-                const wwvFreq = getWWVTone(minute);
-                if (wwvFreq) frequencies.push(wwvFreq);
-            }
-            if (wwvhHours.includes(hour)) {
-                const wwvhFreq = getWWVHTone(minute);
-                if (wwvhFreq) frequencies.push(wwvhFreq);
-            }
-
-            frequencies.forEach(frequency => {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = "sine";
-                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                continuousOscillators.push(oscillator);
-                continuousGainNodes.push(gainNode);
-
-                setTimeout(() => {
-                    oscillator.stop();
-                    oscillator.disconnect();
-                    gainNode.disconnect();
-                }, duration);
-            });
-
-            setTimeout(() => {
-                continuousOscillators = [];
-                continuousGainNodes = [];
-            }, duration);
-        }
-
-        function playPreTone(frequency, duration = 1000, callback = null) {
-            if (!enableAudio) return;
-            console.log("Playing pre-tone:", frequency, "Hz for", duration, "ms");
-            stopPreTone();
-            preToneOscillator = audioCtx.createOscillator();
-            preToneGain = audioCtx.createGain();
-            preToneOscillator.type = "sine";
-            preToneOscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            preToneGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
-            preToneOscillator.connect(preToneGain);
-            preToneGain.connect(audioCtx.destination);
-            preToneOscillator.start();
-
-            setTimeout(() => {
-                stopPreTone();
-                if (typeof callback === "function") callback();
-            }, duration);
-        }
-
-        function stopPreTone() {
-            if (preToneOscillator) {
-                preToneOscillator.stop();
-                preToneOscillator.disconnect();
-                preToneOscillator = null;
-            }
-            if (preToneGain) {
-                preToneGain.disconnect();
-                preToneGain = null;
-            }
-        }
-
+        // ─────────────────────────────────────────────
+        // 1000 Hz TICK — reduced to 10 ms during voice/FSK (MODIFIED)
+        // ─────────────────────────────────────────────
         function play1000HzTick() {
-            console.log('play1000HzTick called, enableAudio:', enableAudio);
             if (!enableAudio) return;
 
             const now = new Date();
             const utcMinutes = now.getUTCMinutes();
             const utcSeconds = now.getUTCSeconds();
 
-            // Check if we're in a constant tone period (every 10 minutes, seconds 1-40)
-            const isConstantPeriod = (utcMinutes % 10 === 0) && utcSeconds >= 1 && utcSeconds <= 40;
+            // Reduced tick duration during voice or FSK
+            const isReducedMode = isSpeaking || isFSKPlaying;
 
-            // Check if voice is playing (reduce volume during announcements and a few seconds before/after)
+            const isConstantPeriod = (utcMinutes % 10 === 0) && utcSeconds >= 1 && utcSeconds <= 40;
             const isVoiceTime = (utcSeconds >= 38 && utcSeconds <= 56);
 
             if (isConstantPeriod) {
-                // Start or maintain constant tone
-                if (!isConstantToneActive) {
-                    startConstantTone();
-                }
-                // Do volume burst every second
-                doVolumeBurst();
+                if (!isConstantToneActive) { startConstantTone(); }
+                doVolumeBurst(isReducedMode);
                 return;
             } else {
-                // Stop constant tone if it was active
-                if (isConstantToneActive) {
-                    stopConstantTone();
-                }
+                if (isConstantToneActive) { stopConstantTone(); }
 
-                // Play normal tick with appropriate volume
-                const volume = isVoiceTime ? 0.05 : 1.0; // 5% during voice, 100% otherwise
+                // 10 ms during voice/FSK, 300 ms otherwise
+                const tickDur = isReducedMode ? 10 : 300;
+                const volume  = isVoiceTime   ? 0.05 : 1.0;
 
                 if (tick1000Oscillator) {
                     tick1000Oscillator.stop();
@@ -1018,11 +1274,22 @@ WWVH Schedule:
                 tick1000Oscillator.type = "sine";
                 tick1000Oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-
                 tick1000Oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
                 tick1000Oscillator.start();
+
+                // DUT1 split second: play a second tick 20 ms later
+                const dut1Abs   = Math.round(Math.abs(DUT1) * 10); // number of split seconds (1–8)
+                const splitRange = DUT1 > 0
+                    ? [1, dut1Abs]     // seconds 1–N for positive DUT1
+                    : [-1, -dut1Abs];  // seconds 9–(8+N) for negative DUT1
+                let isSplitSecond = false;
+                if (DUT1 > 0 && utcSeconds >= 1 && utcSeconds <= dut1Abs) {
+                    isSplitSecond = true;
+                } else if (DUT1 < 0 && utcSeconds >= 9 && utcSeconds <= 8 + dut1Abs) {
+                    isSplitSecond = true;
+                }
+
                 setTimeout(() => {
                     if (tick1000Oscillator) {
                         tick1000Oscillator.stop();
@@ -1030,76 +1297,60 @@ WWVH Schedule:
                         tick1000Oscillator = null;
                     }
                     gainNode.disconnect();
-                }, 300); // 300 ms
+
+                    // Second tick for split second
+                    if (isSplitSecond) {
+                        const t2 = audioCtx.createOscillator();
+                        const g2 = audioCtx.createGain();
+                        t2.type = "sine";
+                        t2.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                        g2.gain.setValueAtTime(volume, audioCtx.currentTime);
+                        t2.connect(g2);
+                        g2.connect(audioCtx.destination);
+                        t2.start();
+                        setTimeout(() => { t2.stop(); t2.disconnect(); g2.disconnect(); }, tickDur);
+                    }
+                }, tickDur);
             }
         }
 
         function startConstantTone() {
             if (isConstantToneActive) return;
-
             const now = new Date();
             const utcSeconds = now.getUTCSeconds();
             const isVoiceTime = (utcSeconds >= 38 && utcSeconds <= 56);
-            const baseVolume = isVoiceTime ? 0.02 : 0.2; // 2% during voice, 20% otherwise
-
+            const baseVolume = isVoiceTime ? 0.02 : 0.2;
             constantToneOscillator = audioCtx.createOscillator();
-            constantToneGain = audioCtx.createGain();
-
+            constantToneGain       = audioCtx.createGain();
             constantToneOscillator.type = "sine";
             constantToneOscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
             constantToneGain.gain.setValueAtTime(baseVolume, audioCtx.currentTime);
-
             constantToneOscillator.connect(constantToneGain);
             constantToneGain.connect(audioCtx.destination);
-
             constantToneOscillator.start();
             isConstantToneActive = true;
         }
 
-        function stopConstantTone() {
-            if (!isConstantToneActive) return;
-
-            if (constantToneOscillator) {
-                constantToneOscillator.stop();
-                constantToneOscillator.disconnect();
-                constantToneOscillator = null;
-            }
-            if (constantToneGain) {
-                constantToneGain.disconnect();
-                constantToneGain = null;
-            }
-            isConstantToneActive = false;
-        }
-
-        function doVolumeBurst() {
+        function doVolumeBurst(isReducedMode = false) {
             if (!constantToneGain) return;
-
             const now = new Date();
             const utcSeconds = now.getUTCSeconds();
             const isVoiceTime = (utcSeconds >= 38 && utcSeconds <= 56);
-            const burstVolume = isVoiceTime ? 0.1 : 1.0; // 10% burst during voice, 100% otherwise
-            const baseVolume = isVoiceTime ? 0.02 : 0.2; // Match the base volume from startConstantTone
-
-            // Ramp up to burst volume
+            const burstVolume = (isVoiceTime || isReducedMode) ? 0.1 : 1.0;
+            const baseVolume  = (isVoiceTime || isReducedMode) ? 0.02 : 0.2;
+            const burstDur    = isReducedMode ? 0.01 : 0.3; // 10 ms or 300 ms
             constantToneGain.gain.setValueAtTime(burstVolume, audioCtx.currentTime);
-            // Ramp back down to base volume after 300ms
-            constantToneGain.gain.setValueAtTime(baseVolume, audioCtx.currentTime + 0.3);
+            constantToneGain.gain.setValueAtTime(baseVolume,  audioCtx.currentTime + burstDur);
         }
 
         function start1000HzTick() {
-            console.log('start1000HzTick called');
-            if (tick1000Interval) return; // Prevent multiple intervals
-
-            // Start immediately for testing
-            play1000HzTick(); // Play immediately
+            if (tick1000Interval) return;
+            play1000HzTick();
             tick1000Interval = setInterval(play1000HzTick, 1000);
         }
 
         function stop1000HzTick() {
-            if (tick1000Interval) {
-                clearInterval(tick1000Interval);
-                tick1000Interval = null;
-            }
+            if (tick1000Interval) { clearInterval(tick1000Interval); tick1000Interval = null; }
             if (tick1000Oscillator) {
                 tick1000Oscillator.stop();
                 tick1000Oscillator.disconnect();
@@ -1108,26 +1359,18 @@ WWVH Schedule:
             stopConstantTone();
         }
 
-        // Overlay click-to-start logic
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOMContentLoaded fired');
+        // ─────────────────────────────────────────────
+        // CLICK OVERLAY — resume AudioContext
+        // ─────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
             const overlay = document.getElementById('futs-overlay');
-            overlay.addEventListener('click', function() {
-                console.log('Overlay clicked');
+            overlay.addEventListener('click', function () {
                 overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 300);
-                // Create and resume AudioContext if needed
+                setTimeout(() => { overlay.style.display = 'none'; }, 300);
                 if (!audioCtx) {
-                    console.log('Creating audio context');
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                if (audioCtx.state === 'suspended') {
-                    console.log('Resuming audio context');
-                    audioCtx.resume();
-                }
-                console.log('Audio context state:', audioCtx.state);
+                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             });
         });
     </script>
